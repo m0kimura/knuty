@@ -16,19 +16,19 @@ var K={Custom: {}, Event: {}, INFOJ: {}, REC: [], SCREEN: {}, CFG: {}, DICT: '',
   info: function(group){
     var me=this; var d, o, a, i, k, p;
 //
-// mode, config, groupの決定
+// mode決定
     var mode;
-    if(process.env.RUNMODE){mode=process.env.RUNMODE;}
-    else if(me.isExist(process.env.HOME+'/debug.config')){
-      mode='debug'; me.CFG.config=process.env.HOME+'/debug.config';
+    if(me.isExist(process.env.HOME+'/master.config')){
+      mode='master';
+    }else{
+      mode=process.env.RUNMODE||"debug";
     }
-    else if(me.isExist(process.env.HOME+'/master.config')){
-      mode='master'; me.CFG.config=process.env.HOME+'/master.config';
-    }
-    else{mode="standalone";}
     me.CFG.mode=mode;
-    if(process.env.RUNCONFIG){me.CFG.config=process.env.RUNCONFIG;}
-    group=group||mode;
+    if(mode=='master'){
+      me.CFG.config=process.env.RUNCONFIG||process.env.HOME+'/master.config';
+    }else{
+      me.CFG.config=process.env.RUNCONFIG||process.env.HOME+'/debug.config';
+    }
 //
 // 省略値設定
     me.CFG.dbdriver='knpostgre'; me.CFG.admin=''; me.CFG.psw=''; me.CFG.service='Gmail';
@@ -42,10 +42,9 @@ var K={Custom: {}, Event: {}, INFOJ: {}, REC: [], SCREEN: {}, CFG: {}, DICT: '',
     me.CFG.groupid=process.getgid(); me.CFG.uid=process.getuid();
     me.CFG.platform=process.platform; me.CFG.user=process.env.USER; me.CFG.home=process.env.HOME;
     me.CFG.directory=me.pullDir(process.argv[1]);
+    a=me.CFG.current.split('/'); group=group||a[3];
 //  ログディレクトリチェック
     me.checkDir(['log']);
-    me.infoLog('MODE: '+mode);
-    if(mode=='standalone'){return;}
 // 設定読み込み
     var f=me.CFG.config;
     if(me.isExist(f)){try{
@@ -55,13 +54,11 @@ var K={Custom: {}, Event: {}, INFOJ: {}, REC: [], SCREEN: {}, CFG: {}, DICT: '',
     }catch(e){
       me.infoLog('コンフィグファイルが読めない。file='+f); process.exit(1);
     }}else{me.infoLog('コンフィグファイルが読めない。file='+f); process.exit(1);}
-
+//
+    me.infoLog('MODE: '+mode);
+//
     var ix=0;
-    if(mode=="debug"){
-      for(i in o){if(o[i].group=='debug'){ix=i; break;}}
-    }else{
-      for(i in o){if(o[i].group==group){ix=i; break;}}
-    }
+    for(i in o){if(o[i].group==group && o[i].mode==mode){ix=i; break;}}
 
     var f=''; t='';
     if(o[ix].valid){a=o[ix].valid.split(':'); f=a[0]; t=a[1];}
@@ -69,12 +66,8 @@ var K={Custom: {}, Event: {}, INFOJ: {}, REC: [], SCREEN: {}, CFG: {}, DICT: '',
     if(me.today('YMD')>=f && me.today('YMD')<=t){
       for(k in o[ix]){me.CFG[k]=o[ix][k];}
     }
-   
-    if(o[ix].project){me.CFG.project=o[ix].project;}
-    else{var t=me.CFG.directory.split("/"); me.CFG.project=t[3];}
 
     if(mode=='master'){me.infoLog('CONFIG>>'+JSON.stringify(me.CFG));}
-    
   },
 //
 //
