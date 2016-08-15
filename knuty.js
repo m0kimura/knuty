@@ -18,10 +18,10 @@ var K={Custom: {}, Event: {}, INFOJ: {}, REC: [], SCREEN: {}, CFG: {}, DICT: '',
 //
 // mode決定
     var mode;
-    if(me.isExist(process.env.HOME+'/master.config')){
-      mode='master';
-    }else{
+    if(me.isExist(process.env.HOME+'/debug.config')){
       mode=process.env.RUNMODE||"debug";
+    }else{
+      mode=process.env.RUNMODE||"master";
     }
     me.CFG.mode=mode;
     if(mode=='master'){
@@ -501,20 +501,21 @@ var K={Custom: {}, Event: {}, INFOJ: {}, REC: [], SCREEN: {}, CFG: {}, DICT: '',
   getRequest: function(op, data){
     var me=this;
     op=op||{}; op.hostname=op.hostname||'localhost'; op.port=op.port||'80';
-    op.path=op.path||'/'; op.protocol=op.protocol||'http://';
-    var url=op.protocol+op.hostname+':'+op.port+op.path;
-    if(data){url+='?'+Qs.stringify(data);}
+    op.path=op.path||'/';
 
     var body;
     var wid=me.ready();
-    Hp.get(url, function(res){
+    Hp.get(op, function(res){
       body=''; res.setEncoding('utf8');
       res.on('data', function(chunk){body+=chunk;});
       res.on('end', function(){me.post(wid, body);});
     }).on('error', function(e){me.error=e.message; me.post(wid, {});});
-    me.wait();
-    try{return JSON.parse(me.wait);}catch(e){me.error=e; return {};}
-
+    try{
+      if(data=="json"){return JSON.parse(me.wait());}
+      else{return me.wait();}
+    }catch(e){
+      me.error=e; return {};
+    }
   },
 //
 //
