@@ -4,7 +4,7 @@ NODEJS 基本ルール
 
 ##これは何
 
-様々な基本となる機能を提供する nodejs です。
+様々な基本となる機能を提供する nodejs です。　Kmrweb Dot Net http://www.kmrweb.net/server/ をご覧下さい。
 
 ##動作環境
 
