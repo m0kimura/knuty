@@ -7,28 +7,28 @@ var Hp=require('http');
 var Qs=require('querystring');
 
 var K={Custom: {}, Event: {}, INFOJ: {}, REC: [], SCREEN: {}, CFG: {}, DICT: '',
-    error: '', Related: '', Fiber: {},
+    Mode: "", error: '', Related: '', Fiber: {},
 //
   version: function(){console.log('0.1-5220');},
 //
 // info 環境情報の取り出し printenv
 //      ()==>CFG
   info: function(group){
-    var me=this; var d, o, a, i, k, p;
+    var me=this; var d, o, a, i, k, p, f, t;
 //
-// mode決定
+// mode, config, groupの決定
     var mode;
-    if(me.isExist(process.env.HOME+'/debug.config')){
-      mode=process.env.RUNMODE||"debug";
-    }else{
-      mode=process.env.RUNMODE||"master";
+    if(process.env.RUNMODE){mode=process.env.RUNMODE;}
+    else if(me.isExist(process.env.HOME+'/debug.config')){
+      mode='debug'; me.CFG.config=process.env.HOME+'/debug.config';
     }
+    else if(me.isExist(process.env.HOME+'/master.config')){
+      mode='master'; me.CFG.config=process.env.HOME+'/master.config';
+    }
+    else{mode="standalone";}
     me.CFG.mode=mode;
-    if(mode=='master'){
-      me.CFG.config=process.env.RUNCONFIG||process.env.HOME+'/master.config';
-    }else{
-      me.CFG.config=process.env.RUNCONFIG||process.env.HOME+'/debug.config';
-    }
+    if(process.env.RUNCONFIG){me.CFG.config=process.env.RUNCONFIG;}
+    group=group||mode;
 //
 // 省略値設定
     me.CFG.dbdriver='knpostgre'; me.CFG.admin=''; me.CFG.psw=''; me.CFG.service='Gmail';
@@ -36,17 +36,19 @@ var K={Custom: {}, Event: {}, INFOJ: {}, REC: [], SCREEN: {}, CFG: {}, DICT: '',
 //
 // 自動設定
     p=me.lastOf(process.argv[1], '/');
-    me.CFG.log=process.env.HOME+'/log'+process.argv[1].substr(p)+'p'+process.pid+'.log';
+    me.CFG.home=process.env.HOME;
+    me.CFG.log=process.env.HOME+'/log'+process.argv[1].substr(p)+'.'+me.date('YMD-HIS')+'.log';
     me.CFG.path=process.argv[1]; me.CFG.pid=process.pid; me.CFG.current=process.cwd();
     me.CFG.apli=me.filepart(me.CFG.path);
     me.CFG.groupid=process.getgid(); me.CFG.uid=process.getuid();
     me.CFG.platform=process.platform; me.CFG.user=process.env.USER; me.CFG.home=process.env.HOME;
     me.CFG.directory=me.pullDir(process.argv[1]);
-    a=me.CFG.current.split('/'); group=group||a[3];
 //  ログディレクトリチェック
     me.checkDir(['log']);
+    me.infoLog('MODE: '+mode);
+    if(mode=='standalone'){return;}
 // 設定読み込み
-    var f=me.CFG.config;
+    f=me.CFG.config;
     if(me.isExist(f)){try{
       me.infoLog('config file='+f);
       if(d=me.getFs(f)){o=JSON.parse(d);}
@@ -54,20 +56,20 @@ var K={Custom: {}, Event: {}, INFOJ: {}, REC: [], SCREEN: {}, CFG: {}, DICT: '',
     }catch(e){
       me.infoLog('コンフィグファイルが読めない。file='+f); process.exit(1);
     }}else{me.infoLog('コンフィグファイルが読めない。file='+f); process.exit(1);}
-//
-    me.infoLog('MODE: '+mode);
-//
-    var ix=0;
-    for(i in o){if(o[i].group==group && o[i].mode==mode){ix=i; break;}}
 
-    var f=''; t='';
-    if(o[ix].valid){a=o[ix].valid.split(':'); f=a[0]; t=a[1];}
-    if(!f){f='000101';} if(!t){t='991231';}
-    if(me.today('YMD')>=f && me.today('YMD')<=t){
-      for(k in o[ix]){me.CFG[k]=o[ix][k];}
-    }
-
+    a=me.CFG.directory.split("/"); me.CFG.project=a[3];
+    var ix; for(ix in o){if(mode==o[ix].mode){
+      if(o[ix].group==a[3] || o[ix].group=='all'){
+        f=''; t='';
+        if(o[ix].valid){a=o[ix].valid.split(':'); f=a[0]; t=a[1];}
+        if(!f){f='000101';} if(!t){t='991231';}
+        if(me.today('YMD')>=f && me.today('YMD')<=t){
+          for(k in o[ix]){me.CFG[k]=o[ix][k];}
+        }
+      }
+    }}
     if(mode=='master'){me.infoLog('CONFIG>>'+JSON.stringify(me.CFG));}
+    me.Mode=mode;
   },
 //
 //
@@ -269,6 +271,12 @@ var K={Custom: {}, Event: {}, INFOJ: {}, REC: [], SCREEN: {}, CFG: {}, DICT: '',
   },
   now: function(f){
     f=f||'H:I:S'; return this.date(f);
+  },
+  addDays: function(days, from, form){
+    var me=this; var d;
+    d=from||new Date(); form=form||'YMD'; days=days||0;
+    d.setTime(d.getTime()+(days*86400000));
+    return me.date(form, d);
   },
 //
 // isExist ファイル存在確認
@@ -516,6 +524,7 @@ var K={Custom: {}, Event: {}, INFOJ: {}, REC: [], SCREEN: {}, CFG: {}, DICT: '',
     }catch(e){
       me.error=e; return {};
     }
+
   },
 //
 //
