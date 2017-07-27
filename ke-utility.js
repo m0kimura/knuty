@@ -1,11 +1,11 @@
-'use strict';
+'use babel';
 //#######1#########2#########3#########4#########5#########6#########7#########8#########9#########0
-var Fs=require('fs');
-var Os=require('os');
-var Cp=require('child_process');
-var Ev=require('events');
-var Hp=require('http');
-var Qs=require('querystring');
+const Fs=require('fs');
+const Os=require('os');
+const Cp=require('child_process');
+const Ev=require('events');
+const Hp=require('http');
+const Qs=require('querystring');
 module.export = class keUtility {
   constructer () {
     this.Custom = {}; this.Event = {}; this.INFOJ = {};
@@ -567,4 +567,4 @@ module.export = class keUtility {
     }
     return out;
   }
-}
+};
