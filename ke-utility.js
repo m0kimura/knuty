@@ -1,13 +1,14 @@
+'use babel';
 //#######1#########2#########3#########4#########5#########6#########7#########8#########9#########0
-let Fs=require('fs');
-let Os=require('os');
-let Cp=require('child_process');
-let Ev=require('events');
-let Hp=require('http');
-let Qs=require('querystring');
+var Fs=require('fs');
+var Os=require('os');
+var Cp=require('child_process');
+var Ev=require('events');
+var Hp=require('http');
+var Qs=require('querystring');
 module.export = class keUtility {
   constructer () {
-    this.Custom = {}; this.Event = {}; this.INFOJ = {}; 
+    this.Custom = {}; this.Event = {}; this.INFOJ = {};
     this.REC = []; this.SCREEN = {}; this.CFG = {};
     this.DICT = {};
     this.Mode = ""; this.error = ''; this.Related = '';
