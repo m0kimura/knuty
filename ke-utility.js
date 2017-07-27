@@ -6,7 +6,7 @@ const Cp=require('child_process');
 const Ev=require('events');
 const Hp=require('http');
 const Qs=require('querystring');
-module.export = class keUtility {
+module.exports = class keUtility {
   constructer () {
     this.Custom = {}; this.Event = {}; this.INFOJ = {};
     this.REC = []; this.SCREEN = {}; this.CFG = {};
