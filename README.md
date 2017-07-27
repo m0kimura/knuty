@@ -1,4 +1,4 @@
-#knuty
+#ke-utility
 
 NODEJS 基本ルール
 

@@ -1,25 +1,24 @@
 {
-  "name": "knuty",
-  "description": "Kmrweb.net universal utility",
+  "name": "ke-utility",
+  "description": "Kmrweb.net universal utility ",
   "keywords": [
-    "knuty"
+    "ke-utility"
   ],
-  "homepage": "http://www.kmrweb.net/server/knuty.html",
+  "homepage": "http://www.kmrweb.net/server/ke-utility.html",
   "license": "MIT",
-  "version": "1.1.0",
+  "version": "1.0.0",
   "author": {
     "name": "michihiro kimura",
     "email": "kimura@kmrweb.net"
   },
   "repository": {
     "type": "git",
-    "url": "git://github.org/m0kimura/knuty.git"
+    "url": "git://github.org/m0kimura/ke-utility.git"
   },
   "dependencies": {
-    "fibers": "^2.0.0"
   },
   "engines": {
     "node": ">=0.5.2"
   },
-  "main": "./knuty.js"
+  "main": "./ke-utility.js"
 }
