@@ -7,7 +7,7 @@ const Ev=require('events');
 const Hp=require('http');
 const Qs=require('querystring');
 module.exports = class keUtility {
-  constructer () {
+  constructor () {
     this.Custom = {}; this.Event = {}; this.INFOJ = {};
     this.REC = []; this.SCREEN = {}; this.CFG = {};
     this.DICT = {};
