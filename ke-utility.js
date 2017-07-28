@@ -491,7 +491,7 @@ module.exports = class keUtility {
     let eproc = (err) => {if(err){console.log(err);}};
     let out, k; for(k in lines){
       out=me.date('Y/M/D H:I:S')+' ['+level+'] '+k+': '+lines[k]+'\n';
-      if(!me.isDebug()){Fs.appendFile(me.CFG.log, out, eproc(err));}
+      if(!me.isDebug()){Fs.appendFile(me.CFG.log, out, eproc());}
       console.log(out);
     }
   }
