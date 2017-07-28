@@ -407,7 +407,7 @@ module.exports = class keUtility {
 //       (コマンド)==>実行結果
   shell(cmd) {
     let me=this, rc;
-    promise.resolve().then( () => {
+    Promise.resolve().then( () => {
       Cp.exec(cmd, (err, stdout, stderr) => {
         if(!err){me.stdout=stdout; rc=true;}
         else{me.infoEx(err, err.code); rc=false;}
@@ -437,7 +437,7 @@ module.exports = class keUtility {
 // sleep 時間待ち
 //       (ミリセカンド)
   sleep(ms) {
-    promise.resolve().then( () => {
+    Promise.resolve().then( () => {
       setTimeout(() => {resolve();}, ms);
     }).then( () => {
       return true;
@@ -514,7 +514,7 @@ module.exports = class keUtility {
     op.path=op.path||'/';
 
     let body;
-    promise.resolve().then( () => {
+    Promise.resolve().then( () => {
       Hp.get(op, (res) => {
         body=''; res.setEncoding('utf8');
         res.on('data', (chunk) => {body+=chunk;});
@@ -540,7 +540,7 @@ module.exports = class keUtility {
 
     let sd=Qs.stringify(data);
     let body, req;
-    promise.resolve ().then ( () => {
+    Promise.resolve ().then ( () => {
       req=Hp.request(op, (res) => {
         body=''; res.setEncoding('utf8');
         res.on('data', (chunk) => {body+=chunk;});
