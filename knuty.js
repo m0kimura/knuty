@@ -1,21 +1,4 @@
-'use strict';
 //#######1#########2#########3#########4#########5#########6#########7#########8#########9#########0
-<<<<<<< HEAD:ke-utility.js
-const Fs=require('fs');
-const Os=require('os');
-const Cp=require('child_process');
-const Ev=require('events');
-const Hp=require('http');
-const Qs=require('querystring');
-module.exports = class keUtility {
-  constructor () {
-    this.Custom = {}; this.Event = {}; this.INFOJ = {};
-    this.REC = []; this.SCREEN = {}; this.CFG = {};
-    this.DICT = {};
-    this.Fiber=require('fibers');
-    this.Mode = ""; this.error = ''; this.Related = '';
-  }
-=======
 var Fs=require('fs');
 var Os=require('os');
 var Cp=require('child_process');
@@ -24,42 +7,28 @@ var Hp=require('http');
 var Qs=require('querystring');
 
 var K={Custom: {}, Event: {}, INFOJ: {}, REC: [], SCREEN: {}, CFG: {}, DICT: '',
-    error: '', Related: '', Fiber: {},
->>>>>>> parent of 80c1fd7... update from ha-project:knuty.js
+    Mode: "", error: '', Related: '', Fiber: {},
 //
-  version () {
-    console.log('1.0-7727');
-  }
+  version: function(){console.log('0.1-5220');},
 //
 // info 環境情報の取り出し printenv
 //      ()==>CFG
-<<<<<<< HEAD:ke-utility.js
-  info (group) {
-    let me=this, d, o, a, i, k, p, f, t;
+  info: function(group){
+    var me=this; var d, o, a, i, k, p, f, t;
 //
 // mode, config, groupの決定
-    let mode;
+    var mode;
     if(process.env.RUNMODE){mode=process.env.RUNMODE;}
     else if(me.isExist(process.env.HOME+'/debug.config')){
       mode='debug'; me.CFG.config=process.env.HOME+'/debug.config';
-=======
-  info: function(group){
-    var me=this; var d, o, a, i, k, p;
-//
-// mode決定
-    var mode;
-    if(me.isExist(process.env.HOME+'/debug.config')){
-      mode=process.env.RUNMODE||"debug";
-    }else{
-      mode=process.env.RUNMODE||"master";
->>>>>>> parent of 80c1fd7... update from ha-project:knuty.js
     }
+    else if(me.isExist(process.env.HOME+'/master.config')){
+      mode='master'; me.CFG.config=process.env.HOME+'/master.config';
+    }
+    else{mode="standalone";}
     me.CFG.mode=mode;
-    if(mode=='master'){
-      me.CFG.config=process.env.RUNCONFIG||process.env.HOME+'/master.config';
-    }else{
-      me.CFG.config=process.env.RUNCONFIG||process.env.HOME+'/debug.config';
-    }
+    if(process.env.RUNCONFIG){me.CFG.config=process.env.RUNCONFIG;}
+    group=group||mode;
 //
 // 省略値設定
     me.CFG.dbdriver='knpostgre'; me.CFG.admin=''; me.CFG.psw=''; me.CFG.service='Gmail';
@@ -67,41 +36,29 @@ var K={Custom: {}, Event: {}, INFOJ: {}, REC: [], SCREEN: {}, CFG: {}, DICT: '',
 //
 // 自動設定
     p=me.lastOf(process.argv[1], '/');
-    me.CFG.log=process.env.HOME+'/log'+process.argv[1].substr(p)+'p'+process.pid+'.log';
+    me.CFG.home=process.env.HOME;
+    me.CFG.log=process.env.HOME+'/log'+process.argv[1].substr(p)+'.'+me.date('YMD-HIS')+'.log';
     me.CFG.path=process.argv[1]; me.CFG.pid=process.pid; me.CFG.current=process.cwd();
     me.CFG.apli=me.filepart(me.CFG.path);
     me.CFG.groupid=process.getgid(); me.CFG.uid=process.getuid();
     me.CFG.platform=process.platform; me.CFG.user=process.env.USER; me.CFG.home=process.env.HOME;
     me.CFG.directory=me.pullDir(process.argv[1]);
-    a=me.CFG.current.split('/'); group=group||a[3];
 //  ログディレクトリチェック
     me.checkDir(['log']);
+    me.infoLog('MODE: '+mode);
+    if(mode=='standalone'){return;}
 // 設定読み込み
-    var f=me.CFG.config;
+    f=me.CFG.config;
     if(me.isExist(f)){try{
       me.infoLog('config file='+f);
-      d=me.getFs(f);
-      if(d){o=JSON.parse(d);}
+      if(d=me.getFs(f)){o=JSON.parse(d);}
       else{me.infoLog('コンフィグファイルが読めない。file='+f); process.exit(1);}
     }catch(e){
       me.infoLog('コンフィグファイルが読めない。file='+f); process.exit(1);
     }}else{me.infoLog('コンフィグファイルが読めない。file='+f); process.exit(1);}
-//
-    me.infoLog('MODE: '+mode);
-//
-    var ix=0;
-    for(i in o){if(o[i].group==group && o[i].mode==mode){ix=i; break;}}
 
-    var f=''; t='';
-    if(o[ix].valid){a=o[ix].valid.split(':'); f=a[0]; t=a[1];}
-    if(!f){f='000101';} if(!t){t='991231';}
-    if(me.today('YMD')>=f && me.today('YMD')<=t){
-      for(k in o[ix]){me.CFG[k]=o[ix][k];}
-    }
-
-<<<<<<< HEAD:ke-utility.js
     a=me.CFG.directory.split("/"); me.CFG.project=a[3];
-    let ix; for(ix in o){if(mode==o[ix].mode){
+    var ix; for(ix in o){if(mode==o[ix].mode){
       if(o[ix].group==a[3] || o[ix].group=='all'){
         f=''; t='';
         if(o[ix].valid){a=o[ix].valid.split(':'); f=a[0]; t=a[1];}
@@ -113,86 +70,77 @@ var K={Custom: {}, Event: {}, INFOJ: {}, REC: [], SCREEN: {}, CFG: {}, DICT: '',
     }}
     if(mode=='master'){me.infoLog('CONFIG>>'+JSON.stringify(me.CFG));}
     me.Mode=mode;
-  }
-=======
-    if(mode=='master'){me.infoLog('CONFIG>>'+JSON.stringify(me.CFG));}
   },
->>>>>>> parent of 80c1fd7... update from ha-project:knuty.js
 //
 //
 //        ({fn: ファイルパス, [infoj: true/false, stop: true/false]})
-  localConf (op) {
-    let me=this; op=op||{};
-    let fn=op.fn||process.argv[1].replace(/\.js/, '.cfg');
-    let infoj=op.infoj||false; let stop=op.stop||false; me.error='';
-    let rc;
+  localConf: function(op){
+    var me=this; op=op||{}; var fn=op.fn||process.argv[1].replace(/\.js/, '.cfg');
+    var infoj=op.infoj||false; var stop=op.stop||false; me.error='';
     try{
-      rc=this.getFs(fn); if(infoj){this.INFOJ=JSON.parse(rc);}else{this.CFG=JSON.parse(rc);}
+      var rc=this.getFs(fn); if(infoj){this.INFOJ=JSON.parse(rc);}else{this.CFG=JSON.parse(rc);}
     }catch(e){
       if(stop){me.sevierLog(e);}else{me.error=e; return {};}
     }
     if(rc){return JSON.parse(rc);}else{return {};}
-  }
+  },
 //
 //
 //
-  dict(key, field) {
-    let me=this, rc; me.error=''; field=field||'jp';
+  dict: function(key, field){
+    var me=this, rc; me.error=''; field=field||'jp';
     if(me.DICT==''){me.DICT=me.getObject(me.CFG.dictionary, true);}
     try{rc=me.DICT[key][field];}catch(e){me.error=e; rc=key;}
     return rc;
-  }
+  },
 //
 // MAIN ROUTINE
 //
-  MAIN(proc, op) {
-    this.Fiber(function(me){
-      op=op||{};
-      me.info(op.group);
-      for(var k in op){me.CFG[k]=op[k];}
+  MAIN: function(proc, op){
+    K.Fiber(function(me){
+      K.info();
+      op=op||{}; for(var k in op){K.CFG[k]=op[k];}
       proc(me, this);
     }).run(this);
-  }
+  },
 //
 // argv 起動引数の取り出し
 //      (n個目)==>値
-  argv(n) {return process.argv[n+2];}
+  argv: function(n){return process.argv[n+2];},
 //
 // develop テンプレートの展開
 //
-  develop(fname, dt, ix) {
-    let me=this; if(!dt){dt=me.REC;} if(!ix){ix=0;}
-    let d=me.getText(fname, true);
-    let f={}; f.HEAD=''; f.BODY=''; f.FOOT='';
-    let k='BODY', out='';
-    let i;
+  develop: function(fname, dt, ix){
+    var me=this; if(!dt){dt=me.REC;} if(!ix){ix=0;}
+    var d=me.getText(fname, true);
+    var f={}; f['HEAD']=''; f['BODY']=''; f['FOOT']=''; var k='BODY'; var out='';
     if(d){
       if(d[0]){
         if(d[0].charCodeAt(0)==65279){d[0]=d[0].substr(1);} // bom除去feff
         if(d[0].charCodeAt(0)==65534){d[0]=d[0].substr(1);} // bom除去fffe
       }
-      for(i in d){switch(d[i]){
+      for(var i in d){switch(d[i]){
        case '-HEAD': k='HEAD'; break; case '-BODY': k='BODY'; break; case '-FOOT': k='FOOT'; break;
        default: f[k]+=d[i]+"\n";
       }}
     }else{return false;}
 
-    let url;
-    if(f.BODY){
-      out=me.parm(f.HEAD, dt[ix]);
-      for(i in dt){
+    var url;
+    if(f['BODY']){
+      out=me.parm(f['HEAD'], dt[ix]);
+      for(var i in dt){
         url=dt[i].url||''; if(url==me.INFOJ.url){me.INFOJ.now='now';}else{me.INFOJ.now='';}
-        out+=me.parm(f.BODY, dt[i]);
+        out+=me.parm(f['BODY'], dt[i]);
       }
-      out+=me.parm(f.FOOT, dt[ix]);
+      out+=me.parm(f['FOOT'], dt[ix]);
     }else{me.error="#ERROR MEM frame="+fname; return false;}
     return out;
-  }
+  },
 //
 // parm パラメータ展開
 //      (文字列, {パラメタ})   #{}<-INFOJ, %{}<-REC, ${}, ${}<-SCREEN &{}<- CFG
-  parm(ln, dt, ix, i, j, c, sw, out, cc, key) { // develop parameter
-    let me=this; sw=0; out=''; key=''; if(!ix){ix=0;}
+  parm: function(ln, dt, ix, i, j, c, sw, out, cc, key){ // develop parameter
+    var me=this; sw=0; out=''; key=''; if(!ix){ix=0;}
     if(!ln){return '';}
     for(i=0; i<ln.length; i++){
       c=ln.substr(i, 1); cc=ln.substr(i, 2);
@@ -221,14 +169,24 @@ var K={Custom: {}, Event: {}, INFOJ: {}, REC: [], SCREEN: {}, CFG: {}, DICT: '',
       }
     }
     return out;
-  }
+  },
+//
+//
+  execJs: function(response, fn, parameter){
+    var d=Fs.readFileSync('./js/'+fn).toString();
+    try{
+      eval(d); return '';
+    }catch(err){
+      return err;
+    }
+  },
 //
 // unstring 文字列をスペースデリミタで分解
 //         (文字列)=>[結果j配列]
-  unstring(x) {
-    let win=false, sin=false, ein=false, a=[], j=0;
+  unstring: function(x){
+    var win=false; var sin=false; var ein=false; var a=[]; var j=0;
     a[0]=''; a[1]='';
-    let i; for(i=0; i<x.length; i++){
+    var i; for(i=0; i<x.length; i++){
       if(ein){
         a[j]+=x[i]; ein=false;
       }else{
@@ -242,64 +200,62 @@ var K={Custom: {}, Event: {}, INFOJ: {}, REC: [], SCREEN: {}, CFG: {}, DICT: '',
          case ' ':
           if(sin){a[j]+=x[i];}else{if(win){j++; win=false;}} break;
          default:
-          if(sin){a[j]+=x[i];}else{if(win){a[j]+=x[i];}else{win=true; a[j]=x[i];}} break;
+          if(sin){a[j]+=x[i]}else{if(win){a[j]+=x[i];}else{win=true; a[j]=x[i];}} break;
         }
       }
     }
     return a;
-  }
+  },
 //
-  escape(txt) {
-   let o='', x; for(x in txt){if(txt[x]=="'"){o+="'";} o=o+txt[x];} return o;
-  }
+  escape: function(txt){
+    var o=''; for(var x in txt){if(txt[x]=="'"){o+="'"} o=o+txt[x]} return o;
+  },
 //
 //
 //
-  lastOf(txt, x) {
-    let i;
-    for(i=txt.length-1; i>-1; i--){if(txt[i]==x){return i;}}
+  lastOf: function(txt, x){
+    for(var i=txt.length-1; i>-1; i--){if(txt[i]==x){return i;}}
     return -1;
-  }
+  },
 //
-  pullDir(txt) {
-    let i=this.lastOf(txt, '/'); return txt.substr(0, i+1);
-  }
+  pullDir: function(txt, x){
+    var i=this.lastOf(txt, '/'); return txt.substr(0, i+1);
+  },
 //
-  repby(txt, x, y) {
-    let out='', i; for(i in txt){if(txt[i]==x){out+=y;}else{out+=txt[i];}} return out;
-  }
+  repby: function(txt, x, y){
+    var out=''; for(var i in txt){if(txt[i]==x){out+=y;}else{out+=txt[i];}} return out;
+  },
 //
-  separate(txt, x) {
-    let out=[], i; out[0]=''; out[1]=''; f=true;
-    for(i in txt){
+  separate: function(txt, x){
+    var out=[]; out[0]=''; out[1]=''; f=true;
+    for(var i in txt){
       if(f && txt[i]==x){f=false;}else{if(f){out[0]+=txt[i];}else{out[1]+=txt[i];}}
     }
     return out;
-  }
+  },
 //
 // modifier 接尾拡張子を取り出し
 //          (ファイル名)==>拡張子
-  modifier(x) {
-    let p=x.lastIndexOf('.'); if(p<0){return '';} p++; return x.substr(p);
-  }
+  modifier: function(x){
+    var p=x.lastIndexOf('.'); if(p<0){return '';} p++; return x.substr(p);
+  },
 //
 // filepart ファイル名部分を取り出し
 //          (ファイル名)==>拡張子
-  filepart(x) {
-    let p=x.lastIndexOf('/'); if(p<0){return x;} p++; return x.substr(p);
-  }
+  filepart: function(x){
+    var p=x.lastIndexOf('/'); if(p<0){return x;} p++; return x.substr(p);
+  },
 //
 // pathpart パス部分を取り出し
 //          (ファイル名)==>拡張子
-  pathpart(x) {
-    let p=x.lastIndexOf('/'); if(p<0){return '';} return x.substr(0, p+1);
-  }
+  pathpart: function(x){
+    var p=x.lastIndexOf('/'); if(p<0){return '';} p; return x.substr(0, p+1);
+  },
 //
 // date 日付編集 YMD ymd HIS his W w
 //      (編集文字列)==>編集日付
-  date(t, time) {
-    let d;
-    if(time){d=new Date(time);}else{d=new Date();}
+  date: function(t, time){
+    if(time){var d=new Date(time);}else{var d=new Date();}
     t=t.replace(/Y/, d.getYear()-100); t=t.replace(/y/, d.getYear()+1900);
     t=t.replace(/M/, (d.getMonth()+101+' ').substr(1, 2)); t=t.replace(/m/, d.getMonth()+1);
     t=t.replace(/D/, (d.getDate()+100+' ').substr(1, 2)); t=t.replace(/d/, d.getDate());
@@ -309,56 +265,52 @@ var K={Custom: {}, Event: {}, INFOJ: {}, REC: [], SCREEN: {}, CFG: {}, DICT: '',
     t=t.replace(/W/, ['日', '月', '火', '水', '木' ,'金' , '土'][d.getDay()]);
     t=t.replace(/w/, ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'][d.getDay()]);
     return t;
-  }
-  today(f) {
+  },
+  today: function(f){
     f=f||'Y/M/D'; return this.date(f);
-  }
-  now(f) {
+  },
+  now: function(f){
     f=f||'H:I:S'; return this.date(f);
-<<<<<<< HEAD:ke-utility.js
-  }
-  addDays(days, from, form) {
-    let me=this, d;
+  },
+  addDays: function(days, from, form){
+    var me=this; var d;
     d=from||new Date(); form=form||'YMD'; days=days||0;
     d.setTime(d.getTime()+(days*86400000));
     return me.date(form, d);
-  }
-=======
   },
->>>>>>> parent of 80c1fd7... update from ha-project:knuty.js
 //
 // isExist ファイル存在確認
 //         (ファイル名)==> true|false
-  isExist(fn) {
+  isExist: function(fn){
     try{return Fs.existsSync(fn);}catch(e){return false;}
-  }
+  },
 //
 // mkdir ディレクトリ作成
 //         (ディレクトリ名)==> true|false
-  mkdir(dn) {
+  mkdir: function(dn){
     try{return Fs.mkdirSync(dn);}catch(e){me.error=e; return false;}
-  }
+  },
 //
 // checkDir ディレクトリがなければ作成　HOME以下
 //
-  checkDir(dirs, current) {
-    let me=this, ix, dn; current=current||me.CFG.home+'/';
+  checkDir: function(dirs, current){
+    var me=this; var ix, dn; current=current||me.CFG.home+'/';
     for(ix in dirs){dn=current+dirs[ix];if(!me.isExist(dn)){me.mkdir(dn);}}
-  }
+  },
 //
 // dir ディレクトリリスト
 //     (ディレクトリ, file||dir)==>[リスト]
-  dir(path, type) {
-    let me=this, out=[]; me.error='';
+  dir: function(path, type){
+    var me=this; var out=[]; me.error='';
     try{
       switch(type){
        case 'file':
-        Fs.readdirSync(path).forEach((file) => {
+        Fs.readdirSync(path).forEach(function(file){
           if(Fs.statSync(path+file).isFile()){out.push(file);}
         });
         return out;
        case 'dir':
-        Fs.readdirSync(path).forEach((file) => {
+        Fs.readdirSync(path).forEach(function(file){
           if(!Fs.statSync(path+file).isFile()){out.push(file);}
         });
         return out;
@@ -366,43 +318,41 @@ var K={Custom: {}, Event: {}, INFOJ: {}, REC: [], SCREEN: {}, CFG: {}, DICT: '',
         return Fs.readdirSync(path);
       }
     }catch(e){me.error=e; return {};}
-  }
+  },
 //
 // stat ファイル属性の取得
 //      (ファイル名)==>属性オブジェクト
-  stat(fn) {
-    let out={}, x, k, a;
+  stat: function(fn){
+    var out={};
     if(this.isExist(fn)){
-      x=Fs.statSync(fn); a=[]; for(k in x){
+      var x=Fs.statSync(fn); var a=[]; for(var k in x){
         switch(k){
           case 'atime': case 'mtime': case 'ctime':
            out[k]=this.date('YMDHIS', x[k]);
-          break;
-         default: out[k]=x[k]; break;
+           break;
+          default: out[k]=x[k]; break;
         }
       }
       return out;
     }else{return false;}
-  }
+  },
 //
 // getObject オブジェクト形式ファイル読み込み(RECインターフェイス)
 //           (ファイル名, <リターンフラグ>)==>完了フラグ|オブジェクト
-  getObject(fname, ret) {
-    let me=this, d, rc={}; me.error='';
+  getObject: function(fname, ret){
+    var me=this; var d, rc={}; me.error='';
     if(me.isExist(fname)){
-      d=me.getFs(fname);
-      if(d){rc=JSON.parse(d);}
+      if(d=me.getFs(fname)){rc=JSON.parse(d);}
     }else{me.error='file not found f='+fname; return false;}
     if(ret){return rc;}else{me.REC=rc; return me.REC.length;}
-   }
+   },
 //
 // getText テキストファイル読み込み
 //           (ファイル名, リターンフラグ)==>完了フラグ|オブジェクト[]
-  getText(fname, ret) {
-    let me=this, d, p=0, i=0, rc, out=[]; me.error='';
+  getText: function(fname, ret){
+    var me=this; var d, p=0, i=0, rc, out=[]; me.error='';
     try{
-      d=me.getFs(fname);
-      if(d){while(p>-1){
+      if(d=me.getFs(fname)){while(p>-1){
         p=d.indexOf("\n");
         if(p<0){out[i]=d;}else{out[i]=d.substr(0, p); d=d.substr(p+1);}
         if(out[i].indexOf("\r")>-1){out[i]=out[i].substr(0, out[i].length-1);} i++;
@@ -410,219 +360,222 @@ var K={Custom: {}, Event: {}, INFOJ: {}, REC: [], SCREEN: {}, CFG: {}, DICT: '',
       if(ret){return out;}
       else{me.REC=[]; for(i in out){me.REC[i]={}; me.REC[i].data=out[i];} return me.REC.length;}
     }catch(e){me.error=e; return false;}
-  }
+  },
 //
 // getjson JSON形式ファイルの読み込み
 //        (ファイル名)==>オブジェクト||false
-  getJson(fn) {
-    let rc;
+  getJson: function(fn){
     try{
-      rc=this.getFs(fn); if(rc){return JSON.parse(rc);}else{return false;}
+      var rc=this.getFs(fn); if(rc){return JSON.parse(rc);}else{return false;}
     }catch(e){this.error=e;}
-  }
+  },
 //
 // getFs ファイル読み込み
 //       (ファイル名)==>バッファ
-  getFs(fn) {
+  getFs: function(fn){
     this.error='';
-    let d;
-    if(this.isExist(fn)){d=Fs.readFileSync(fn).toString(); return d;}
+    if(this.isExist(fn)){var d=Fs.readFileSync(fn).toString(); return d;}
     else{this.error='file not found file='+fn; return false;}
-  }
+  },
 //
 // getIp 自IPアドレス
 //       ()
-  getIp(id, ver) {
-    let me=this; ver=ver||'ipv4';
-    let a=K.getIPs()[ver];
-    let i; for( i in a){
-      if(!id){return a[i].address;}
-      else{if(id==a[i].name){return a[i].address;}}
+  getIp: function(id, ver){
+    var me=this; ver=ver||'ipv4'; var a=K.getIPs()[ver];
+    for(var i in a){
+      if(!id){return a[i]['address'];}
+      else{if(id==a[i]['name']){return a[i]['address'];}}
     }
     return false;
-  }
-  getIPs() {
-    let o={}; o.ipv4=[]; o.ipv6=[];
-    let nif=Os.networkInterfaces();
-    let k, j, x;
-    for(k in nif){for(j in nif[k]){
-      x=nif[k][j];
-      if(!x.internal){
-        switch(x.family){
-          case "IPv4": o.ipv4.push({name: k, address: x.address}); break;
-          case "IPv6": o.ipv6.push({name: k, address: x.address}); break;
-        }
+  },
+  getIPs: function(){
+    var o={}; o.ipv4=[]; o.ipv6=[];
+    var nif=Os.networkInterfaces();
+    for(var k in nif){nif[k].forEach(function(x){if(!x.internal){
+      switch(x.family){
+        case "IPv4": o.ipv4.push({name: k, address: x.address}); break;
+        case "IPv6": o.ipv6.push({name: k, address: x.address}); break;
       }
-    }}
+    }});}
     return o;
-  }
+  },
 //
 // shell シェルコマンドの実行
 //       (コマンド)==>実行結果
-  shell(cmd) {
-    let me=this, rc;
-    let wid=me.ready();
-    Cp.exec(cmd, (err, stdout, stderr) => {
+  shell: function(cmd){
+    var me=this; var id=me.ready(); var rc;
+    Cp.exec(cmd, function(err, stdout, stderr){
       if(!err){me.stdout=stdout; rc=true;}
       else{me.infoEx(err, err.code); rc=false;}
-      me.post(wid);
+      me.post(id);
     });
-    me.wait();
-  }
+    me.wait(); return rc;
+  },
 //
-  on(ev, proc) {
-    this.Custom.ev=new Ev.EventEmitter();
-    this.Custom.ev.on(ev, proc);
-  }
+  on: function(ev, proc){
+    this.Custom[ev]=new Ev.EventEmitter;
+    this.Custom[ev].on(ev, function(){proc();});
+  },
 //
-  fire(ev, arg1, arg2, arg3) {
+  fire: function(ev, arg1, arg2, arg3){
     if(this.Custom[ev]){this.Custom[ev].emit(ev, arg1, arg2, arg3); return true;}
     else{this.error='event not found ev='+ev; return false;}
-  }
+  },
 //
-  off(ev) {
-    if(this.Custom[ev]){this.Custom[ev].removeListener(ev, () => {delete me.Custom[ev];});}
+  off: function(ev){
+    if(this.Custom[ev]){this.Custom[ev].removeListener(ev, function(){delete me.Custom[ev];});}
     else{this.error='event not found ev='+ev; return false;}
     return true;
-  }
+  },
 //
 // ready, wait, post 逐次制御：開始, 待ち、通知
 //       (id)      Km.read('tb_manage', {key: 'Quenode'});
-  ready() {var id=Math.random(); this.Event[id]=this.Fiber.current; return id;}
-  wait() {var rc=this.Fiber.yield(); return rc;}
-  post(id, dt) {this.Event[id].run(dt); delete this.Event[id];}
+
+  ready: function(){var id="KEY"+Math.random(); K.Event[id]=K.Fiber.current; return id;},
+  wait: function(){var rc=K.Fiber.yield(); return rc;},
+  post: function(id, dt){K.Event[id].run(dt); delete K.Event[id];},
 //
 // sleep 時間待ち
 //       (ミリセカンド)
-  sleep(ms) {
-    let me=this;
-    let wid=me.ready();
-    setTimeout(() => {me.post(wid);}, ms);
-    me.wait();
-  }
+  sleep: function(ms){
+    var fiber=this.Fiber.current;
+    setTimeout(function(){fiber.run();}, ms);
+    this.Fiber.yield();
+  },
 //###
 //LOG MANAGEMENT
 //###
-  isDebug() {
+  isDebug: function(){
     if(!this.CFG){return true;} if(this.CFG.mode=='debug'){return true;}
     return false;
-  }
+  },
 // debug, info, notice, warn, error, crit, alert, emerg
-  sevierLog(msg, e) { // 重大エラー　呼び出し、終了
-    let me=this, d={}, l; d.msg=msg;
-    if(e){d=me.analyze(e); d.msg=msg;}else{d=me.getPos(msg);} l='sevier';
+  sevierLog: function(msg, e){ // 重大エラー　呼び出し、終了
+    var me=this; var d={}; d['msg']=msg;
+    if(e){d=me.analyze(e); d['msg']=msg;}else{d=me.getPos(msg);} var l='sevier';
     this.putlog(l, d);
     me.notify(l, 'システムエラー通知 ['+l+'] ',d);
-  }
-  errorLog (msg, e) { // 通常エラー処理、ログ記録
-    let me=this, d={}, l;
-    if(e){d=me.analyze(e); d.msg=msg;}else{d=me.getPos(msg);} l='error';
+  },
+  errorLog: function(msg, e){ // 通常エラー処理、ログ記録
+    var me=this; var d={};
+    if(e){d=me.analyze(e); d['msg']=msg;}else{d=me.getPos(msg);} var l='error';
     this.putlog(l, d);
-  }
-  noticeLog(msg) {
-    let me=this, d=this.getPos(msg), l='notice';
+  },
+  noticeLog: function(msg){
+    var me=this; var d=this.getPos(msg); var l='notice';
     this.putlog(l, d);
     me.notify(l, 'システム情報 ['+l+'] ', d);
-  }
-  warnLog(msg) { // 警告メッセージ
-    let me=this, d=this.getPos(msg), l='warn';
+  },
+  warnLog: function(msg){ // 警告メッセージ
+    var me=this; var d=this.getPos(msg); var l='warn';
     this.putlog(l, d);
-  }
-  infoLog(msg, e) { // エラーかどうかはアプリで判断
-    let me=this, d={}, l;
-    if(e){d=me.analyze(e); d.msg=msg;}else{d.msg=msg;} l='info';
+  },
+  infoLog: function(msg, e){ // エラーかどうかはアプリで判断
+    var me=this; var d={};
+    if(e){d=me.analyze(e); d['msg']=msg;}else{d['msg']=msg;} var l='info';
     this.putlog(l, d);
-  }
-  debugLog(msg) { // デバッグ用記録
-    let me=this, d=this.getPos(msg), l='debug';
+  },
+  debugLog: function(msg){ // デバッグ用記録
+    var me=this; var d=this.getPos(msg); var l='debug';
     this.putlog(l, d);
-  }
-  justLog(msg) { // ログのみ
-    let me=this, d=this.getPos(msg), l='debug';
+  },
+  justLog: function(msg){ // ログのみ
+    var me=this; var d=this.getPos(msg); var l='debug';
     this.putlog(l, d);
-  }
+  },
 //
-  putlog(level, lines) {
-    let me=this, tbl={debug: 0, info: 1, warn: 2, notice: 3, error: 4, sevier: 5};
-    let f=(tbl[me.CFG.level]>tbl[level]);
-    let eproc = (err) => {if(err){console.log(err);}};
-    let out, k; for(k in lines){
+  putlog: function(level, lines){
+    var me=this; var tbl={debug: 0, info: 1, warn: 2, notice: 3, error: 4, sevier: 5};
+    var f=(tbl[me.CFG.level]>tbl[level]);
+    var out, k; for(k in lines){
       out=me.date('Y/M/D H:I:S')+' ['+level+'] '+k+': '+lines[k]+'\n';
-      if(!me.isDebug()){Fs.appendFile(me.CFG.log, out, eproc());}
+      if(!me.isDebug()){Fs.appendFile(me.CFG.log, out, function(err){if(err){console.log(err);}});}
       console.log(out);
     }
-  }
+  },
 //
-  notify(level, subject, data) {
-    let me=this, rc; data=data||{};
+  notify: function(level, subject, data){
+    var me=this; data=data||{};
     if(me.CFG.notify=='yes'){
       data.subject=subject; data.level=level; data.debug=me.isDebug();
       data.program=JSON.stringify(process.argv);
-      rc=me.postRequest(me.CFG.communicator, data);
+      var rc=me.postRequest(me.CFG.communicator, data);
       if(!rc){console.log('NOTIFY ERROR');}
     }
-  }
+  },
 //
 // getRequest
 //
-  getRequest(op, data) {
-    let me=this;
+  getRequest: function(op, data){
+    var me=this;
     op=op||{}; op.hostname=op.hostname||'localhost'; op.port=op.port||'80';
     op.path=op.path||'/';
 
-    let body;
-    let wid=me.ready();
-    Hp.get(op, (res) => {
+    var body;
+    var wid=me.ready();
+    Hp.get(op, function(res){
       body=''; res.setEncoding('utf8');
-      res.on('data', (chunk) => {body+=chunk;});
-      res.on('end', () => {me.post(wid);});
-    }).on('error', (e) => {me.error=e.message; me.post(wid);});
-    me.wait();
+      res.on('data', function(chunk){body+=chunk;});
+      res.on('end', function(){me.post(wid, body);});
+    }).on('error', function(e){me.error=e.message; me.post(wid, {});});
     try{
-      if(data=="json"){return JSON.parse(body);}
-      else{return body;}
+      if(data=="json"){return JSON.parse(me.wait());}
+      else{return me.wait();}
     }catch(e){
       me.error=e; return {};
     }
-<<<<<<< HEAD:ke-utility.js
-  }
-=======
+
   },
->>>>>>> parent of 80c1fd7... update from ha-project:knuty.js
 //
 //
 //
-  postRequest(op, data) {
-    let me=this;
+  postRequest: function(op, data){
+    var me=this;
     op=op||{}; op.hostname=op.hostname||'localhost'; op.port=op.port||'8085';
     op.path=op.path||'/'; op.method='POST';
     op.headers={'Content-Type': 'application/x-www-form-urlencoded'};
 
-    let sd=Qs.stringify(data);
-    let body, req;
-    let wid=me.ready();
-    req=Hp.request(op, (res) => {
+    var sd=Qs.stringify(data);
+    var body;
+    var wid=me.ready();
+    var req=Hp.request(op, function(res){
       body=''; res.setEncoding('utf8');
-      res.on('data', (chunk) => {body+=chunk;});
-      res.on('end', () => {me.post(wid);});
-    }).on('error', (e) => {me.error=e.message; me.post(wid);});
+      res.on('data', function(chunk){body+=chunk;});
+      res.on('end', function(){me.post(wid, body);});
+    }).on('error', function(e){me.error=e.message; me.post(wid, {});});
     req.write(sd); req.end();
     me.wait();
-    try{return JSON.parse(body);}catch(e){me.error=e; return {};}
-  }
+    try{return JSON.parse(me.wait);}catch(e){me.error=e; return {};}
+
+  },
 //
-  getPos(msg) {
+  getPos: function(msg){
     try{throw new Error(msg);}catch(e){return this.analyze(e, 3);}
-  }
+  },
 // analyze エラー分解
-  analyze(e, n) {
-    n=n||1; let out={}, a, p;
+  analyze: function(e, n){
+    n=n||1; var out={};
     if(e.stack){
-      a=e.stack.split(/[\r\n]+/);
-      out.err=a[0];
-      p=a[n].indexOf('at '); out.pos=a[n].substr(p+3);
-      if(this.Related){out.related=this.Related;}
+      var a=e.stack.split(/[\r\n]+/); 
+      out['err']=a[0];
+      var p=a[n].indexOf('at '); out['pos']=a[n].substr(p+3);
+      if(this.Related){out['related']=this.Related;}
     }
     return out;
+  },
+// methods メソッドリストアップ
+  methods: function(){
+    var x='', c=''; for(var k in this){x+=c+k; c=', ';} console.log(x);
+  },
+// extend メソッド、プロパティの拡張
+  extend: function(obj, noover){
+    var k; for(k in obj){
+      if(this[k]){
+        if(noover){console.log(k, 'メソッド重複');}
+        else{this[k]=obj[k];}
+      }else{this[k]=obj[k];}
+    }
   }
 };
+K.Fiber=require('fibers');
+module.exports=K;
