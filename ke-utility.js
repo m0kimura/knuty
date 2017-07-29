@@ -11,6 +11,7 @@ module.exports = class keUtility {
     this.Custom = {}; this.Event = {}; this.INFOJ = {};
     this.REC = []; this.SCREEN = {}; this.CFG = {};
     this.DICT = {};
+    this.Fiber=require('fibers');
     this.Mode = ""; this.error = ''; this.Related = '';
   }
 //
@@ -102,6 +103,17 @@ module.exports = class keUtility {
     if(me.DICT==''){me.DICT=me.getObject(me.CFG.dictionary, true);}
     try{rc=me.DICT[key][field];}catch(e){me.error=e; rc=key;}
     return rc;
+  }
+//
+// MAIN ROUTINE
+//
+  MAIN(proc, op) {
+    this.Fiber(function(me){
+      op=op||{};
+      me.info(op.group);
+      for(var k in op){me.CFG[k]=op[k];}
+      proc(me, this);
+    }).run(this);
   }
 //
 // argv 起動引数の取り出し
@@ -407,15 +419,13 @@ module.exports = class keUtility {
 //       (コマンド)==>実行結果
   shell(cmd) {
     let me=this, rc;
-    Promise.resolve().then( () => {
-      Cp.exec(cmd, (err, stdout, stderr) => {
-        if(!err){me.stdout=stdout; rc=true;}
-        else{me.infoEx(err, err.code); rc=false;}
-        resolve();
-      });
-    }).then( () => {
-      return rc;
+    let wid=me.ready();
+    Cp.exec(cmd, (err, stdout, stderr) => {
+      if(!err){me.stdout=stdout; rc=true;}
+      else{me.infoEx(err, err.code); rc=false;}
+      me.post(wid);
     });
+    me.wait();
   }
 //
   on(ev, proc) {
@@ -434,14 +444,19 @@ module.exports = class keUtility {
     return true;
   }
 //
+// ready, wait, post 逐次制御：開始, 待ち、通知
+//       (id)      Km.read('tb_manage', {key: 'Quenode'});
+  ready() {var id=Math.random(); this.Event[id]=this.Fiber.current; return id;}
+  wait() {var rc=this.Fiber.yield(); return rc;}
+  post(id, dt) {this.Event[id].run(dt); delete this.Event[id];}
+//
 // sleep 時間待ち
 //       (ミリセカンド)
   sleep(ms) {
-    Promise.resolve().then( () => {
-      setTimeout(() => {resolve();}, ms);
-    }).then( () => {
-      return true;
-    });
+    let me=this;
+    let wid=me.ready();
+    setTimeout(() => {me.post(wid);}, ms);
+    me.wait();
   }
 //###
 //LOG MANAGEMENT
@@ -514,20 +529,19 @@ module.exports = class keUtility {
     op.path=op.path||'/';
 
     let body;
-    Promise.resolve().then( () => {
-      Hp.get(op, (res) => {
-        body=''; res.setEncoding('utf8');
-        res.on('data', (chunk) => {body+=chunk;});
-        res.on('end', () => {resolve();});
-      }).on('error', (e) => {me.error=e.message; resolve();});
-    }).then( () => {
-      try{
-        if(data=="json"){return JSON.parse(body);}
-        else{return body;}
-      }catch(e){
-        me.error=e; return {};
-      }
-    });
+    let wid=me.ready();
+    Hp.get(op, (res) => {
+      body=''; res.setEncoding('utf8');
+      res.on('data', (chunk) => {body+=chunk;});
+      res.on('end', () => {me.post(wid);});
+    }).on('error', (e) => {me.error=e.message; me.post(wid);});
+    me.wait();
+    try{
+      if(data=="json"){return JSON.parse(body);}
+      else{return body;}
+    }catch(e){
+      me.error=e; return {};
+    }
   }
 //
 //
@@ -540,17 +554,15 @@ module.exports = class keUtility {
 
     let sd=Qs.stringify(data);
     let body, req;
-    Promise.resolve ().then ( () => {
-      req=Hp.request(op, (res) => {
-        body=''; res.setEncoding('utf8');
-        res.on('data', (chunk) => {body+=chunk;});
-        res.on('end', () => {resolve();});
-      }).on('error', (e) => {me.error=e.message; resolve();});
-      req.write(sd); req.end();
-    }).then ( () => {
-      try{return JSON.parse(body);}catch(e){me.error=e; return {};}
-    });
-
+    let wid=me.ready();
+    req=Hp.request(op, (res) => {
+      body=''; res.setEncoding('utf8');
+      res.on('data', (chunk) => {body+=chunk;});
+      res.on('end', () => {me.post(wid);});
+    }).on('error', (e) => {me.error=e.message; me.post(wid);});
+    req.write(sd); req.end();
+    me.wait();
+    try{return JSON.parse(body);}catch(e){me.error=e; return {};}
   }
 //
   getPos(msg) {

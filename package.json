@@ -6,7 +6,7 @@
   ],
   "homepage": "http://www.kmrweb.net/server/ke-utility.html",
   "license": "MIT",
-  "version": "1.0.7",
+  "version": "1.0.9",
   "author": {
     "name": "michihiro kimura",
     "email": "kimura@kmrweb.net"
@@ -16,6 +16,7 @@
     "url": "git://github.org/m0kimura/ke-utility.git"
   },
   "dependencies": {
+    "fibers": "^2.0.0"
   },
   "engines": {
     "node": ">=0.5.2"
