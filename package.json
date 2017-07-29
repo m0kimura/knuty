@@ -6,7 +6,11 @@
   ],
   "homepage": "http://www.kmrweb.net/server/ke-utility.html",
   "license": "MIT",
+<<<<<<< HEAD
   "version": "1.0.9",
+=======
+  "version": "0.1.2",
+>>>>>>> parent of 80c1fd7... update from ha-project
   "author": {
     "name": "michihiro kimura",
     "email": "kimura@kmrweb.net"

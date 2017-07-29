@@ -1,5 +1,6 @@
 'use strict';
 //#######1#########2#########3#########4#########5#########6#########7#########8#########9#########0
+<<<<<<< HEAD:ke-utility.js
 const Fs=require('fs');
 const Os=require('os');
 const Cp=require('child_process');
@@ -14,6 +15,17 @@ module.exports = class keUtility {
     this.Fiber=require('fibers');
     this.Mode = ""; this.error = ''; this.Related = '';
   }
+=======
+var Fs=require('fs');
+var Os=require('os');
+var Cp=require('child_process');
+var Ev=require('events');
+var Hp=require('http');
+var Qs=require('querystring');
+
+var K={Custom: {}, Event: {}, INFOJ: {}, REC: [], SCREEN: {}, CFG: {}, DICT: '',
+    error: '', Related: '', Fiber: {},
+>>>>>>> parent of 80c1fd7... update from ha-project:knuty.js
 //
   version () {
     console.log('1.0-7727');
@@ -21,6 +33,7 @@ module.exports = class keUtility {
 //
 // info 環境情報の取り出し printenv
 //      ()==>CFG
+<<<<<<< HEAD:ke-utility.js
   info (group) {
     let me=this, d, o, a, i, k, p, f, t;
 //
@@ -29,14 +42,24 @@ module.exports = class keUtility {
     if(process.env.RUNMODE){mode=process.env.RUNMODE;}
     else if(me.isExist(process.env.HOME+'/debug.config')){
       mode='debug'; me.CFG.config=process.env.HOME+'/debug.config';
+=======
+  info: function(group){
+    var me=this; var d, o, a, i, k, p;
+//
+// mode決定
+    var mode;
+    if(me.isExist(process.env.HOME+'/debug.config')){
+      mode=process.env.RUNMODE||"debug";
+    }else{
+      mode=process.env.RUNMODE||"master";
+>>>>>>> parent of 80c1fd7... update from ha-project:knuty.js
     }
-    else if(me.isExist(process.env.HOME+'/master.config')){
-      mode='master'; me.CFG.config=process.env.HOME+'/master.config';
-    }
-    else{mode="standalone";}
     me.CFG.mode=mode;
-    if(process.env.RUNCONFIG){me.CFG.config=process.env.RUNCONFIG;}
-    group=group||mode;
+    if(mode=='master'){
+      me.CFG.config=process.env.RUNCONFIG||process.env.HOME+'/master.config';
+    }else{
+      me.CFG.config=process.env.RUNCONFIG||process.env.HOME+'/debug.config';
+    }
 //
 // 省略値設定
     me.CFG.dbdriver='knpostgre'; me.CFG.admin=''; me.CFG.psw=''; me.CFG.service='Gmail';
@@ -44,19 +67,17 @@ module.exports = class keUtility {
 //
 // 自動設定
     p=me.lastOf(process.argv[1], '/');
-    me.CFG.home=process.env.HOME;
-    me.CFG.log=process.env.HOME+'/log'+process.argv[1].substr(p)+'.'+me.date('YMD-HIS')+'.log';
+    me.CFG.log=process.env.HOME+'/log'+process.argv[1].substr(p)+'p'+process.pid+'.log';
     me.CFG.path=process.argv[1]; me.CFG.pid=process.pid; me.CFG.current=process.cwd();
     me.CFG.apli=me.filepart(me.CFG.path);
     me.CFG.groupid=process.getgid(); me.CFG.uid=process.getuid();
     me.CFG.platform=process.platform; me.CFG.user=process.env.USER; me.CFG.home=process.env.HOME;
     me.CFG.directory=me.pullDir(process.argv[1]);
+    a=me.CFG.current.split('/'); group=group||a[3];
 //  ログディレクトリチェック
     me.checkDir(['log']);
-    me.infoLog('MODE: '+mode);
-    if(mode=='standalone'){return;}
 // 設定読み込み
-    f=me.CFG.config;
+    var f=me.CFG.config;
     if(me.isExist(f)){try{
       me.infoLog('config file='+f);
       d=me.getFs(f);
@@ -65,7 +86,20 @@ module.exports = class keUtility {
     }catch(e){
       me.infoLog('コンフィグファイルが読めない。file='+f); process.exit(1);
     }}else{me.infoLog('コンフィグファイルが読めない。file='+f); process.exit(1);}
+//
+    me.infoLog('MODE: '+mode);
+//
+    var ix=0;
+    for(i in o){if(o[i].group==group && o[i].mode==mode){ix=i; break;}}
 
+    var f=''; t='';
+    if(o[ix].valid){a=o[ix].valid.split(':'); f=a[0]; t=a[1];}
+    if(!f){f='000101';} if(!t){t='991231';}
+    if(me.today('YMD')>=f && me.today('YMD')<=t){
+      for(k in o[ix]){me.CFG[k]=o[ix][k];}
+    }
+
+<<<<<<< HEAD:ke-utility.js
     a=me.CFG.directory.split("/"); me.CFG.project=a[3];
     let ix; for(ix in o){if(mode==o[ix].mode){
       if(o[ix].group==a[3] || o[ix].group=='all'){
@@ -80,6 +114,10 @@ module.exports = class keUtility {
     if(mode=='master'){me.infoLog('CONFIG>>'+JSON.stringify(me.CFG));}
     me.Mode=mode;
   }
+=======
+    if(mode=='master'){me.infoLog('CONFIG>>'+JSON.stringify(me.CFG));}
+  },
+>>>>>>> parent of 80c1fd7... update from ha-project:knuty.js
 //
 //
 //        ({fn: ファイルパス, [infoj: true/false, stop: true/false]})
@@ -277,6 +315,7 @@ module.exports = class keUtility {
   }
   now(f) {
     f=f||'H:I:S'; return this.date(f);
+<<<<<<< HEAD:ke-utility.js
   }
   addDays(days, from, form) {
     let me=this, d;
@@ -284,6 +323,9 @@ module.exports = class keUtility {
     d.setTime(d.getTime()+(days*86400000));
     return me.date(form, d);
   }
+=======
+  },
+>>>>>>> parent of 80c1fd7... update from ha-project:knuty.js
 //
 // isExist ファイル存在確認
 //         (ファイル名)==> true|false
@@ -542,7 +584,11 @@ module.exports = class keUtility {
     }catch(e){
       me.error=e; return {};
     }
+<<<<<<< HEAD:ke-utility.js
   }
+=======
+  },
+>>>>>>> parent of 80c1fd7... update from ha-project:knuty.js
 //
 //
 //
